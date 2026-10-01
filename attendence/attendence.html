@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auralis · Face Attendance</title>
+<script>document.documentElement.dataset.theme=localStorage.getItem('fx_theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap">
+<style>
+:root{color-scheme:light;--navy:#1c2058;--ink:#1a1d4a;--mute:#6b6f9a;--lav:#e8e4ff;--sky:#dff0ff;--mint:#d3f5e6;--peach:#ffe3d3;--pink:#ff7eb6;--line:#dcdcf5;--bg:linear-gradient(160deg,#eef0ff,#e2f0ff 50%,#f4e9ff);--g1:#ffd6ea88;--g2:#c9f0e588;--card:#fff;--surf:#fff;--navbg:#ffffffb8;--navb:#fff;--panel:#1c2058;--tabon:#fff;--tabtx:#1c2058;--aibg:#dbe6ff;--track:#e6e6fa;--sep:#fff9}
+[data-theme=dark]{color-scheme:dark;--navy:#c7caff;--ink:#e9eaff;--mute:#a3a7d8;--lav:#2b2c63;--sky:#1f3a5c;--mint:#1b4340;--peach:#4d3336;--line:#3a3d75;--bg:linear-gradient(160deg,#0d0f2a,#101534 50%,#170f30);--g1:#ff7eb622;--g2:#4de0b418;--card:#191c40;--surf:#24275a;--navbg:#14173acc;--navb:#2d306a;--panel:#0b0d24;--tabon:#e9eaff;--tabtx:#1c2058;--aibg:#2a3477;--track:#2e3168;--sep:#ffffff14}
+[data-theme=dark] .panel{border:1px solid var(--line)}
+body,.card,.nav{transition:background .3s,color .3s}
+.hero h1 [data-i]{background:linear-gradient(120deg,var(--ink),#7c6cff 60%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.glass{max-width:340px;width:100%;margin:auto;padding:20px;border-radius:28px;background:var(--navbg);border:1px solid var(--navb);backdrop-filter:blur(14px);box-shadow:0 20px 60px #7c80d233}
+.gh{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.live{display:flex;align-items:center;gap:6px;color:var(--mute)}.live i{width:8px;height:8px;border-radius:50%;background:#3ddc97;animation:pl 1.6s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 #3ddc9788}100%{box-shadow:0 0 0 10px #3ddc9700}}
+.ringw{position:relative;width:170px;height:170px;margin:8px auto}.ringw svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringw circle{fill:none;stroke-width:9;stroke-linecap:round}.rt{stroke:var(--line)}.rf{stroke:url(#rg);stroke-dasharray:314.16;stroke-dashoffset:314.16;transition:stroke-dashoffset 1s ease}
+.rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.rc b{font-size:34px;line-height:1}.rc span{font-size:12px;color:var(--mute)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.mini div{background:var(--lav);border-radius:14px;padding:8px;text-align:center}.mini b{display:block;font-size:20px}.mini span{font-size:11px;color:var(--mute)}
+.spark{display:flex;gap:6px;align-items:flex-end;height:84px;padding:4px 0}.spark div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}.spark i{width:100%;border-radius:6px;background:linear-gradient(180deg,var(--pink),#a99bff)}.spark small{font-size:10px;color:var(--mute)}
+.tick div{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}.tick span{flex:1}.tick img{width:26px;height:26px;border-radius:50%;object-fit:cover}.tick small{color:var(--mute)}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+#left{display:flex;flex-wrap:wrap;gap:6px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--panel);color:#fff;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.25s;z-index:20;border:1px solid var(--line)}#toast.on{opacity:1;transform:translate(-50%,0)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:15px/1.5 Sora,system-ui,sans-serif;background:var(--bg);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(500px 400px at 85% 10%,var(--g1),transparent),radial-gradient(600px 500px at 5% 60%,var(--g2),transparent)}
+.nav{position:sticky;top:12px;z-index:5;margin:12px auto 0;max-width:1080px;display:flex;align-items:center;gap:14px;padding:10px 18px;border-radius:999px;background:var(--navbg);backdrop-filter:blur(14px);border:1px solid var(--navb);box-shadow:0 8px 30px #6a6fd022}
+.logo{font-weight:800;font-size:18px;flex:1}.logo i{font-style:normal;color:var(--pink)}
+select,button,input{font:inherit;color:inherit}
+select{border:1px solid var(--line);background:var(--surf);border-radius:99px;padding:6px 12px}
+.pill{border:0;border-radius:99px;padding:9px 18px;font-weight:600;cursor:pointer;background:var(--pink);color:#fff;box-shadow:0 6px 18px #ff7eb655}
+.pill.ghost{background:var(--surf);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
+.pill:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid #9a8cff;outline-offset:2px}
+.hero{max-width:1080px;margin:0 auto;padding:56px 20px 34px;display:grid;grid-template-columns:1.4fr 1fr;gap:30px;align-items:center}
+.hero h1{font-size:clamp(34px,6vw,64px);line-height:1.05;margin:0 0 16px;font-weight:800;letter-spacing:-1px}
+.hero p{color:var(--mute);max-width:440px;margin:0 0 22px}
+.panel{max-width:1080px;margin:0 auto 60px;background:var(--panel);border-radius:32px;padding:22px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{background:none;border:0;color:#b9bcf0;padding:9px 18px;border-radius:99px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--tabon);color:var(--tabtx)}
+.view{display:none}.view.on{display:block}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.card{background:var(--card);border-radius:22px;padding:18px}
+.card.lav{background:var(--lav)}.card.sky{background:var(--sky)}.card.mint{background:var(--mint)}.card.peach{background:var(--peach)}
+h3{margin:0 0 10px;font-size:15px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+input[type=text],input[type=date],input[type=time],input[type=number]{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surf);min-width:0;width:100%}
+input[type=file]{position:absolute;opacity:0;width:1px;height:1px}
+label.pill{display:inline-block}
+.tog{display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0}
+.stage{position:relative;background:#0f1240;border-radius:18px;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center;color:#8f93d8}
+.stage video,.stage canvas{width:100%;display:none}
+.stage canvas.ov{position:absolute;inset:0;height:100%}
+.bar{height:10px;border-radius:9px;background:var(--track);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),#a99bff);transition:width .4s}
+.feed div,.stu{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--sep)}
+.chip{font-size:11px;padding:2px 9px;border-radius:99px;background:var(--surf);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stats b{display:block;font-size:30px;line-height:1.2}.stats span{font-size:12px;color:var(--mute)}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+.sc{text-align:center;background:var(--sky);border-radius:18px;padding:14px}
+.sc img,.stu img{width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--surf)}
+.sc button{border:0;background:none;color:#c0396f;font-size:12px;cursor:pointer}
+.pend{display:grid;grid-template-columns:52px 1fr 1fr;gap:8px;align-items:center;margin-top:10px}
+.pend small{grid-column:2/4;color:var(--mute)}
+.pb{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13px}.pb .t{flex:1;height:12px;background:var(--track);border-radius:9px;overflow:hidden}
+.pb .t i{display:block;height:100%;background:linear-gradient(90deg,#8de3c1,#a99bff);border-radius:9px}.pb .t i.r{background:linear-gradient(90deg,#ffb38a,var(--pink))}
+.heat{display:flex;gap:5px}.heat i{flex:1;height:34px;border-radius:8px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--mute);font-weight:600;font-size:12px}
+.st{padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600}.st.p{background:var(--mint)}.st.l{background:var(--peach)}.st.a{background:var(--track);color:var(--mute)}
+.empty{color:var(--mute);padding:8px 0;font-size:13px}
+@media(max-width:800px){.hero,.grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.live i{animation:none}.rf{transition:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="logo">Aura<i>lis</i></div>
+  <select id="lang" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="kn">ಕನ್ನಡ</option><option value="es">Español</option></select>
+  <button class="pill ghost" id="theme" aria-label="Toggle dark / light mode" title="Dark / light"></button>
+  <button class="pill ghost" id="kiosk" data-i="kiosk"></button>
+</header>
+
+<section class="hero">
+  <div>
+    <h1><span data-i="title"></span></h1>
+    <p data-i="sub"></p>
+    <button class="pill" id="cta" data-i="cta"></button>
+    <div id="mstat" class="hint" style="margin-top:14px;font-size:13px;color:var(--mute)"></div>
+  </div>
+  <div class="glass" aria-label="Live overview">
+    <div class="gh"><span class="live"><i></i>Live</span><span id="clk"></span></div>
+    <div class="ringw"><svg viewBox="0 0 120 120"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7eb6"/><stop offset="1" stop-color="#a99bff"/></linearGradient></defs><circle class="rt" cx="60" cy="60" r="50"/><circle class="rf" id="rf" cx="60" cy="60" r="50"/></svg><div class="rc"><b id="rp">0%</b><span data-i="rate"></span></div></div>
+    <div class="mini"><div><b id="mP">0</b><span data-i="present"></span></div><div><b id="mL">0</b><span data-i="lateS"></span></div><div><b id="mA">0</b><span data-i="absent"></span></div></div>
+    <div class="spark" id="spark"></div>
+    <div class="tick" id="tick"></div>
+  </div>
+</section>
+
+<main class="panel" id="app">
+  <div class="tabs" role="tablist">
+    <button class="on" data-v="scan" data-i="tScan"></button><button data-v="stu" data-i="tStu"></button>
+    <button data-v="grp" data-i="tGrp"></button><button data-v="ins" data-i="tIns"></button><button data-v="rec" data-i="tRec"></button><button data-v="set" data-i="tSet"></button>
+  </div>
+
+  <div class="row" style="margin-bottom:14px"><select id="g" aria-label="Grade"></select><select id="dv" aria-label="Division"></select></div>
+  <div class="view on" id="scan"><div class="grid">
+    <div class="card lav">
+      <div class="stage" id="stage"><span data-i="stageHint"></span><video id="vid" muted playsinline></video><canvas id="ov" class="ov"></canvas><canvas id="photo"></canvas><div id="big" style="position:absolute;left:0;right:0;bottom:12%;text-align:center;font-size:clamp(22px,4vw,44px);font-weight:800;color:#fff;text-shadow:0 2px 12px #000;display:none"></div></div>
+      <div class="bar"><i id="prog"></i></div>
+      <div style="font-size:13px;margin-top:6px"><b id="pct">0%</b> <span data-i="scanning"></span> · <span id="liveMsg"></span></div>
+    </div>
+    <div>
+      <div class="card sky" style="margin-bottom:16px">
+        <div class="row"><select id="mode" aria-label="Mode" style="width:100%"><option value="std" data-i="mStd"></option><option value="kiosk" data-i="mKiosk"></option><option value="strict" data-i="mStrict"></option></select></div><div class="row"><input type="text" id="cls" value="General" data-p="cls" aria-label="Class"></div>
+        <div class="row"><input type="time" id="start" aria-label="Start time" style="flex:1"><input type="number" id="grace" value="10" min="0" style="width:90px" aria-label="Late after"><small data-i="late"></small></div>
+        <label class="tog"><input type="checkbox" id="tLive" checked><span data-i="liveness"></span></label>
+        <label class="tog"><input type="checkbox" id="tVoice" checked><span data-i="voice"></span></label>
+        <label class="tog"><input type="checkbox" id="tSound" checked><span data-i="sound"></span></label>
+        <div class="row" style="margin-top:10px"><button class="pill" id="camBtn"></button><button class="pill ghost" id="flip" data-i="flip"></button><label class="pill ghost"><span data-i="upload"></span><input type="file" id="classPhoto" accept="image/*"></label></div>
+      </div>
+      <div class="card mint"><h3 data-i="feed"></h3><div class="feed" id="feed"></div></div>
+      <div class="card peach" style="margin-top:16px"><h3 data-i="left"></h3><div id="left"></div></div>
+    </div>
+  </div></div>
+
+  <div class="view" id="stu">
+    <div class="card lav">
+      <div class="row"><label class="pill"><span data-i="addPhotos"></span><input type="file" id="files" accept="image/*" multiple></label><button class="pill ghost" id="saveEnroll" disabled data-i="save"></button></div>
+      <div id="pending"></div>
+    </div>
+    <div class="card" style="margin-top:16px"><h3><span data-i="enrolled"></span> <span id="sc"></span></h3><input type="text" id="q" data-p="search" aria-label="Search"><div class="sg" id="sg"></div></div>
+  </div>
+
+  <div class="view" id="ins">
+    <div class="stats" id="stats"></div>
+    <div class="grid">
+      <div class="card sky"><h3 data-i="perStudent"></h3><div id="bars"></div></div>
+      <div class="card peach"><h3 data-i="days14"></h3><div class="heat" id="heat"></div></div>
+    </div>
+    <div class="card mint" style="margin-top:16px"><div id="top"></div></div>
+  </div>
+
+  <div class="view" id="rec"><div class="card">
+    <div class="row"><input type="date" id="rdate" style="max-width:170px"><input type="text" id="rcls" list="cl" style="max-width:200px"><datalist id="cl"></datalist><button class="pill ghost" id="csv" data-i="exp"></button><button class="pill ghost" id="markAll" data-i="markAll"></button><button class="pill ghost" id="prt" data-i="print"></button></div>
+    <div class="row"><button class="pill ghost" id="csvAll" data-i="csvAll"></button><button class="pill ghost" id="copyB" data-i="copy"></button><button class="pill ghost" id="waB" data-i="wa"></button></div>
+    <div class="row"><input type="text" id="rq" data-p="search" aria-label="Search" style="flex:1;min-width:140px"><select id="rst" aria-label="Status"><option value="" data-i="allS"></option><option value="p" data-i="present"></option><option value="l" data-i="lateS"></option><option value="a" data-i="absent"></option></select><small id="rsum" style="color:var(--mute)"></small></div>
+    <div id="table"></div>
+  </div></div>
+<div class="view" id="grp"><div class="sg" id="cg"></div></div>
+  <div class="view" id="set"><div class="grid">
+    <div class="card sky"><h3 data-i="cfg"></h3>
+      <label class="tog"><span data-i="det"></span> <b id="dV"></b><input type="range" id="sDet" min="5" max="50" style="flex:1"></label>
+      <label class="tog"><span data-i="thr"></span> <b id="tV"></b><input type="range" id="sThr" min="40" max="70" style="flex:1"></label></div>
+    <div class="card mint"><h3 data-i="data"></h3>
+      <div class="row"><button class="pill ghost" id="bk" data-i="backup"></button><label class="pill ghost"><span data-i="restore"></span><input type="file" id="rs" accept=".json"></label></div>
+      <div class="row"><button class="pill ghost" id="c1" data-i="clrToday"></button><button class="pill ghost" id="c2" data-i="clrAll"></button></div></div>
+  </div></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js"></script>
+<script>
+const L={
+en:{sound:"Chime on check-in",flip:"Flip camera",left:"Yet to arrive",allIn:"Everyone is in 🎉",allS:"All statuses",copy:"Copy summary",wa:"WhatsApp",csvAll:"Full report (CSV)",copied:"Copied to clipboard",top:"Top attendance",mostLate:"Most often late",tGrp:"Classes",tSet:"Settings",allG:"All grades",allD:"All divisions",grade:"Grade",div:"Division",mStd:"Classroom mode",mKiosk:"Kiosk mode (gate)",mStrict:"Strict mode (exam)",search:"Search students",markAll:"Mark all present",print:"Print",det:"Detection sensitivity (lower = more sensitive)",thr:"Match strictness",backup:"Backup data",restore:"Restore backup",clrToday:"Clear today",clrAll:"Delete all data",unassigned:"Unassigned",open:"Open in Scan",cfg:"Detection tuning",data:"Data",confirm:"Are you sure?",title:"Face Recognition Attendance",sub:"Detect, verify and mark your whole class in seconds. Private, fast, and it runs in your browser.",cta:"Start scanning",tScan:"Scan",tStu:"Students",tIns:"Insights",tRec:"Records",addPhotos:"Add photos",save:"Save students",cls:"Class name",startCam:"Start camera",stopCam:"Stop camera",upload:"Class photo",liveness:"Blink to verify (anti-spoof)",voice:"Voice greeting",late:"min grace",present:"Present",absent:"Absent",lateS:"Late",name:"Name",roll:"Roll no.",enrolled:"Enrolled",noStu:"No students yet. Add photos in Students.",exp:"Export CSV",kiosk:"Kiosk mode",rate:"Today's rate",today:"Present today",total:"Students",risk:"At risk (<75%)",scanning:"marked",welcome:"Welcome",remove:"Remove",feed:"Live feed",noFeed:"Nobody marked yet.",stageHint:"Camera preview appears here",perStudent:"Attendance per student",days14:"Last 14 days",time:"Time",status:"Status",ready:"Models ready · data stays in this browser",loading:"Loading face models…",blink:"Blink to verify"},
+hi:{title:"फेस रिकग्निशन उपस्थिति",sub:"पूरी कक्षा की उपस्थिति सेकंडों में पहचानें और दर्ज करें।",cta:"स्कैन शुरू करें",tScan:"स्कैन",tStu:"छात्र",tIns:"इनसाइट्स",tRec:"रिकॉर्ड",addPhotos:"फोटो जोड़ें",save:"छात्र सहेजें",cls:"कक्षा का नाम",startCam:"कैमरा चालू करें",stopCam:"कैमरा बंद करें",upload:"कक्षा फोटो",liveness:"पलक झपकाकर सत्यापित करें",voice:"आवाज़ में स्वागत",late:"मिनट छूट",present:"उपस्थित",absent:"अनुपस्थित",lateS:"देर से",name:"नाम",roll:"रोल नं.",enrolled:"नामांकित",exp:"CSV डाउनलोड",kiosk:"किओस्क मोड",rate:"आज की दर",today:"आज उपस्थित",total:"छात्र",welcome:"स्वागत है",remove:"हटाएँ",feed:"लाइव फीड",scanning:"दर्ज",perStudent:"छात्र-वार उपस्थिति",days14:"पिछले 14 दिन"},
+kn:{title:"ಮುಖ ಗುರುತಿಸುವ ಹಾಜರಾತಿ",sub:"ಇಡೀ ತರಗತಿಯ ಹಾಜರಾತಿಯನ್ನು ಕ್ಷಣಗಳಲ್ಲಿ ಗುರುತಿಸಿ ದಾಖಲಿಸಿ.",cta:"ಸ್ಕ್ಯಾನ್ ಆರಂಭಿಸಿ",tScan:"ಸ್ಕ್ಯಾನ್",tStu:"ವಿದ್ಯಾರ್ಥಿಗಳು",tIns:"ಒಳನೋಟ",tRec:"ದಾಖಲೆಗಳು",addPhotos:"ಫೋಟೋ ಸೇರಿಸಿ",save:"ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಉಳಿಸಿ",cls:"ತರಗತಿಯ ಹೆಸರು",startCam:"ಕ್ಯಾಮೆರಾ ಆನ್",stopCam:"ಕ್ಯಾಮೆರಾ ಆಫ್",upload:"ತರಗತಿ ಫೋಟೋ",liveness:"ಕಣ್ಣು ಮಿಟುಕಿಸಿ ಪರಿಶೀಲಿಸಿ",voice:"ಧ್ವನಿ ಸ್ವಾಗತ",late:"ನಿಮಿಷ ಸಡಿಲಿಕೆ",present:"ಹಾಜರು",absent:"ಗೈರು",lateS:"ತಡ",name:"ಹೆಸರು",roll:"ರೋಲ್ ನಂ.",enrolled:"ನೋಂದಾಯಿತ",exp:"CSV ಡೌನ್‌ಲೋಡ್",kiosk:"ಕಿಯೋಸ್ಕ್ ಮೋಡ್",rate:"ಇಂದಿನ ದರ",today:"ಇಂದು ಹಾಜರು",total:"ವಿದ್ಯಾರ್ಥಿಗಳು",welcome:"ಸ್ವಾಗತ",remove:"ತೆಗೆಯಿರಿ",feed:"ಲೈವ್ ಫೀಡ್",scanning:"ದಾಖಲು",perStudent:"ವಿದ್ಯಾರ್ಥಿವಾರು ಹಾಜರಾತಿ",days14:"ಕಳೆದ 14 ದಿನ"},
+es:{title:"Asistencia por reconocimiento facial",sub:"Detecta, verifica y registra a toda la clase en segundos.",cta:"Iniciar escaneo",tScan:"Escanear",tStu:"Alumnos",tIns:"Análisis",tRec:"Registros",addPhotos:"Añadir fotos",save:"Guardar alumnos",cls:"Nombre de la clase",startCam:"Iniciar cámara",stopCam:"Detener cámara",upload:"Foto de clase",liveness:"Parpadea para verificar",voice:"Saludo por voz",late:"min de gracia",present:"Presente",absent:"Ausente",lateS:"Tarde",name:"Nombre",roll:"N.º lista",enrolled:"Inscritos",exp:"Exportar CSV",kiosk:"Modo quiosco",rate:"Tasa de hoy",today:"Presentes hoy",total:"Alumnos",welcome:"Bienvenido",remove:"Quitar",feed:"En vivo",scanning:"registrados",perStudent:"Asistencia por alumno",days14:"Últimos 14 días"}};
+const rt=document.documentElement;
+function setTheme(m){rt.dataset.theme=m;localStorage.setItem('fx_theme',m);$('#theme').textContent=m==='dark'?'☀️':'🌙'}
+function toast(m){let e=$('#toast');if(!e){e=document.createElement('div');e.id='toast';e.setAttribute('role','status');document.body.appendChild(e)}e.textContent=m;e.className='on';clearTimeout(e._t);e._t=setTimeout(()=>e.className='',2200)}
+let ac,facing='user';
+function chime(){try{ac=ac||new(window.AudioContext||webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.12)}catch(e){}}
+const dl=(n,rows)=>{const q=v=>'"'+String(v).replace(/"/g,'""')+'"',a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download=n;a.click()};
+const SPEECH={en:'en-US',hi:'hi-IN',kn:'kn-IN',es:'es-ES'};
+let lang=localStorage.getItem('fx_lang')||'en';
+const t=k=>(L[lang]&&L[lang][k])||L.en[k]||k;
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+let students=ld('fx_students',[]),att=ld('fx_att',{}),pending=[],ready=false,stream=null,feed=[],blink={};
+const persist=()=>{localStorage.setItem('fx_students',JSON.stringify(students));localStorage.setItem('fx_att',JSON.stringify(att))};
+const today=()=>new Date().toLocaleDateString('en-CA'),hm=()=>new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false});
+const sk=(d,c)=>d+'|'+(c||'General').trim();
+const FL={g:'',d:''},gl=(g,d)=>g?`Grade ${g}${d?'-'+d:''}`:'General';
+const inF=s=>(!FL.g||s.grade==FL.g)&&(!FL.d||s.div==FL.d);
+const grp=()=>students.filter(inF);
+const gk=s=>(s.grade||'')+'|'+(s.div||'');
+const GR=[...Array(12)].map((_,i)=>i+1),DV=['A','B','C','D','E','F'];
+const opts=(a,v,all)=>`<option value="">${all}</option>`+a.map(x=>`<option${x==v?' selected':''}>${x}</option>`).join('');
+
+/* detection: low thresholds, multiple detector passes, tiled zoom for group photos */
+let cfg=Object.assign({thr:.6,det:.1},ld('fx_cfg',{}));
+const ssd=()=>new faceapi.SsdMobilenetv1Options({minConfidence:cfg.det,maxResults:100});
+const tiny=(s=608)=>new faceapi.TinyFaceDetectorOptions({inputSize:s,scoreThreshold:cfg.det+.05});
+
+async function detectOne(img){
+  for(const o of [ssd(),tiny(608),tiny(960)]){
+    const d=await faceapi.detectSingleFace(img,o).withFaceLandmarks().withFaceDescriptor();
+    if(d)return d;
+  }
+  return null;
+}
+
+const iou=(a,b)=>{const x=Math.max(a.x,b.x),y=Math.max(a.y,b.y),w=Math.min(a.x+a.width,b.x+b.width)-x,h=Math.min(a.y+a.height,b.y+b.height)-y;if(w<=0||h<=0)return 0;const i=w*h;return i/(a.width*a.height+b.width*b.height-i)};
+
+async function runDetect(src,ox,oy){
+  const f=o=>faceapi.detectAllFaces(src,o).withFaceLandmarks().withFaceExpressions().withFaceDescriptors();
+  let d=await f(ssd());
+  if(!d.length)d=await f(tiny(608));
+  if(!d.length)d=await f(tiny(960));
+  return d.map(x=>{const b=x.detection.box;return{detection:{box:{x:b.x+ox,y:b.y+oy,width:b.width,height:b.height}},descriptor:x.descriptor,expressions:x.expressions,landmarks:x.landmarks,score:x.detection.score}});
+}
+
+async function detectAll(img,tiles){
+  const W=img.videoWidth||img.width,H=img.videoHeight||img.height;
+  const all=await runDetect(img,0,0);
+  if(tiles&&Math.max(W,H)>900){
+    const tw=Math.round(W*.6),th=Math.round(H*.6);
+    for(const ox of [0,W-tw])for(const oy of [0,H-th]){
+      const c=document.createElement('canvas');c.width=tw;c.height=th;
+      c.getContext('2d').drawImage(img,ox,oy,tw,th,0,0,tw,th);
+      all.push(...await runDetect(c,ox,oy));
+    }
+  }
+  all.sort((a,b)=>b.score-a.score);
+  const keep=[];
+  for(const d of all)if(!keep.some(k=>iou(k.detection.box,d.detection.box)>.4))keep.push(d);
+  return keep;
+}
+
+/* i18n */
+function applyLang(){
+  document.documentElement.lang=lang;$('#lang').value=lang;
+  $$('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
+  $$('[data-p]').forEach(e=>e.placeholder=t(e.dataset.p));
+  $('#camBtn').textContent=stream?t('stopCam'):t('startCam');
+  $('#mstat').textContent=ready?t('ready'):t('loading');
+  fillSel();renderAll();
+}
+function fillSel(){$('#g').innerHTML=opts(GR,FL.g,t('allG'));$('#dv').innerHTML=opts(DV,FL.d,t('allD'))}
+$('#g').onchange=$('#dv').onchange=()=>{FL.g=$('#g').value;FL.d=$('#dv').value;$('#cls').value=$('#rcls').value=gl(FL.g,FL.d);renderAll()};
+$('#lang').onchange=e=>{lang=e.target.value;localStorage.setItem('fx_lang',lang);applyLang()};
+
+/* tabs */
+function go(v){$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(x=>x.classList.toggle('on',x.id===v));if(v!=='scan')stopCam();renderAll()}
+$$('.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+$('#cta').onclick=()=>{go('scan');$('#app').scrollIntoView({behavior:'smooth'})};
+$('#kiosk').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()};
+
+/* models */
+(async()=>{try{
+  await Promise.all(['ssdMobilenetv1','tinyFaceDetector','faceLandmark68Net','faceRecognitionNet','faceExpressionNet'].map(n=>faceapi.nets[n].loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/')));
+  ready=true;$('#mstat').textContent=t('ready');
+}catch(e){$('#mstat').textContent='Could not load models. Check internet and reload.'}})();
+
+/* enroll */
+const crop=(img,b)=>{const c=document.createElement('canvas');c.width=c.height=90;const s=Math.max(b.width,b.height)*1.3;c.getContext('2d').drawImage(img,b.x+b.width/2-s/2,b.y+b.height/2-s/2,s,s,0,0,90,90);return c.toDataURL('image/jpeg',.8)};
+$('#files').onchange=async e=>{
+  if(!ready){alert(t('loading'));e.target.value='';return}
+  for(const f of e.target.files){
+    const p={name:f.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '),roll:'',grade:FL.g,div:FL.d,desc:null,thumb:'',msg:'…'};pending.push(p);drawPending();
+    try{const img=await faceapi.bufferToImage(f);const d=await detectOne(img);
+      if(d){p.desc=Array.from(d.descriptor);p.thumb=crop(img,d.detection.box);p.msg='✓'}else p.msg='No face found. Use a clearer front-facing photo.'}
+    catch(x){p.msg='Could not read image'}drawPending();
+  }e.target.value='';
+};
+function drawPending(){
+  $('#pending').innerHTML=pending.map((p,i)=>`<div class="pend"><img src="${p.thumb}" alt="" width="52" height="52" style="border-radius:50%;background:#fff"><input type="text" data-n="${i}" data-f="name" value="${esc(p.name)}" aria-label="${t('name')}" placeholder="${t('name')}"><input type="text" data-n="${i}" data-f="roll" value="${esc(p.roll)}" aria-label="${t('roll')}" placeholder="${t('roll')}"><span></span><select data-n="${i}" data-f="grade" aria-label="${t('grade')}">${opts(GR,p.grade,t('grade'))}</select><select data-n="${i}" data-f="div" aria-label="${t('div')}">${opts(DV,p.div,t('div'))}</select><small>${esc(p.msg)}</small></div>`).join('');
+  $$('#pending [data-f]').forEach(x=>x.oninput=x.onchange=()=>pending[x.dataset.n][x.dataset.f]=x.value);
+  $('#saveEnroll').disabled=!pending.some(p=>p.desc);
+}
+$('#saveEnroll').onclick=()=>{
+  for(const p of pending){if(!p.desc)continue;const key=(p.roll||p.name).trim().toLowerCase();let s=students.find(x=>x.key===key);
+    if(!s){s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),key,name:p.name.trim(),roll:p.roll.trim(),descs:[],thumb:p.thumb};students.push(s)}s.grade=p.grade||s.grade||'';s.div=p.div||s.div||'';s.descs.push(p.desc)}
+  pending=pending.filter(p=>!p.desc);persist();drawPending();renderAll();
+};
+function drawStudents(){
+  const q=($('#q').value||'').toLowerCase(),list=students.filter(s=>inF(s)&&(s.name+s.roll).toLowerCase().includes(q));
+  $('#sc').textContent=students.length?`(${list.length}/${students.length})`:'';
+  $('#sg').innerHTML=list.length?list.map(s=>`<div class="sc"><img src="${s.thumb}" alt=""><div><b>${esc(s.name)}</b></div><small>${esc(s.roll)} · ${s.descs.length}</small><div class="row" style="justify-content:center;margin:6px 0 0"><select data-id="${s.id}" data-f="grade" style="width:64px;padding:2px 4px">${opts(GR,s.grade,'–')}</select><select data-id="${s.id}" data-f="div" style="width:56px;padding:2px 4px">${opts(DV,s.div,'–')}</select></div><button data-id="${s.id}">${t('remove')}</button></div>`).join(''):`<div class="empty">${t('noStu')}</div>`;
+  $$('#sg select').forEach(x=>x.onchange=()=>{students.find(s=>s.id===x.dataset.id)[x.dataset.f]=x.value;persist();renderAll()});
+  $$('#sg button').forEach(b=>b.onclick=()=>{if(confirm(t('remove')+'?')){students=students.filter(s=>s.id!==b.dataset.id);persist();renderAll()}});
+}
+$('#q').oninput=drawStudents;
+
+/* recognition */
+const matcher=()=>{const l=grp().filter(s=>s.descs.length).map(s=>new faceapi.LabeledFaceDescriptors(s.id,s.descs.map(d=>new Float32Array(d))));return l.length?new faceapi.FaceMatcher(l,$('#mode').value==='strict'?Math.min(cfg.thr,.5):cfg.thr):null};
+const ear=p=>{const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);return (d(p[1],p[5])+d(p[2],p[4]))/(2*d(p[0],p[3]))};
+function mark(s,mood){
+  const k=sk(today(),$('#cls').value);att[k]=att[k]||{};if(att[k][s.id])return;
+  const st=$('#start').value;let late=false;
+  if(st){const [h,m]=st.split(':').map(Number),n=new Date();late=(n.getHours()*60+n.getMinutes())-(h*60+m)>(+$('#grace').value||0)}
+  att[k][s.id]={t:hm(),late,mood};persist();feed.unshift({n:s.name,t:hm(),late,mood});feed=feed.slice(0,8);
+  if($('#tVoice').checked&&window.speechSynthesis){const u=new SpeechSynthesisUtterance(t('welcome')+' '+s.name);u.lang=SPEECH[lang];speechSynthesis.speak(u)}
+  if($('#tSound').checked)chime();renderFeed();progress();if($('#mode').value==='kiosk')big(s.name);
+}
+let bt;function big(n){const b=$('#big');b.textContent=t('welcome')+', '+n;b.style.display='block';clearTimeout(bt);bt=setTimeout(()=>b.style.display='none',2500)}
+function progress(){
+  const k=sk(today(),$('#cls').value),n=Object.keys(att[k]||{}).length,p=grp().length?Math.round(n/grp().length*100):0;
+  $('#prog').style.width=p+'%';$('#pct').textContent=p+'%';
+  const got=att[k]||{},lf=grp().filter(s=>!got[s.id]);
+  $('#left').innerHTML=lf.length?lf.slice(0,40).map(s=>`<span class="chip">${esc(s.name)}</span>`).join(''):`<div class="empty">${t('allIn')}</div>`;
+}
+function renderFeed(){$('#feed').innerHTML=feed.length?feed.map(f=>`<div><b>${esc(f.n)}</b><span class="chip">${f.t}</span>${f.late?`<span class="chip" style="background:var(--peach)">${t('lateS')}</span>`:''}<span class="chip">${esc(f.mood||'')}</span></div>`).join(''):`<div class="empty">${t('noFeed')}</div>`}
+function brackets(c,b,col,l){const s=Math.min(b.width,b.height)*.28;c.strokeStyle=col;c.lineWidth=Math.max(3,c.canvas.width/300);
+  [[b.x,b.y,1,1],[b.x+b.width,b.y,-1,1],[b.x,b.y+b.height,1,-1],[b.x+b.width,b.y+b.height,-1,-1]].forEach(([x,y,dx,dy])=>{c.beginPath();c.moveTo(x+dx*s,y);c.lineTo(x,y);c.lineTo(x,y+dy*s);c.stroke()});
+  const fs=Math.max(13,c.canvas.width/46);c.font=`600 ${fs}px Sora,sans-serif`;const w=c.measureText(l).width+16;
+  c.fillStyle=col;c.beginPath();c.roundRect(b.x,b.y-fs-14,w,fs+10,8);c.fill();c.fillStyle='#1c2058';c.fillText(l,b.x+8,b.y-8);
+}
+function drawFaces(cv,dets,w,h,img,m,live){
+  cv.width=w;cv.height=h;const c=cv.getContext('2d');c.clearRect(0,0,w,h);if(img)c.drawImage(img,0,0,w,h);
+  let known=0;
+  for(const d of dets){
+    const r=m.findBestMatch(d.descriptor),s=students.find(x=>x.id===r.label),hit=r.label!=='unknown';
+    const mood=Object.entries(d.expressions).sort((a,b)=>b[1]-a[1])[0][0];let label=hit?s.name:'?',col=hit?'#8de3c1':'#ffb38a';
+    if(hit){known++;
+      let ok=true;
+      if(live&&($('#tLive').checked||$('#mode').value==='strict')){const st=blink[s.id]=blink[s.id]||{open:false,ok:false},e=(ear(d.landmarks.getLeftEye())+ear(d.landmarks.getRightEye()))/2;
+        st.max=Math.max(st.max||0,e);if(st.max>.2&&e<st.max*.78)st.ok=true;ok=st.ok;if(!ok){label=s.name+' · '+t('blink');col='#c9bcff'}}
+      if(ok)mark(s,mood);
+    }
+    brackets(c,d.detection.box,col,label);
+  }
+  return{known,total:dets.length};
+}
+
+/* camera */
+async function startCam(){
+  if(!ready)return alert(t('loading'));if(!matcher())return alert(t('noStu'));
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}}})}catch(e){return alert('Camera blocked. Allow access, or open through localhost/https.')}
+  const v=$('#vid');v.srcObject=stream;await v.play();v.style.display='block';$('#photo').style.display='none';$('#stage span').style.display='none';
+  $('#camBtn').textContent=t('stopCam');blink={};loop();
+}
+function stopCam(){if(stream){stream.getTracks().forEach(x=>x.stop());stream=null}$('#vid').style.display='none';$('#ov').getContext('2d').clearRect(0,0,9999,9999);$('#camBtn').textContent=t('startCam')}
+async function loop(){
+  if(!stream)return;const v=$('#vid'),m=matcher();
+  const d=await detectAll(v,false);if(!stream)return;
+  const r=drawFaces($('#ov'),d,v.videoWidth,v.videoHeight,null,m,true);$('#liveMsg').textContent=`${r.known}/${r.total}`;setTimeout(loop,500);
+}
+$('#flip').onclick=async()=>{facing=facing==='user'?'environment':'user';if(stream){stopCam();await startCam()}};
+$('#camBtn').onclick=()=>stream?stopCam():startCam();
+$('#classPhoto').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;if(!ready)return alert(t('loading'));const m=matcher();if(!m)return alert(t('noStu'));
+  stopCam();$('#stage span').style.display='none';const img=await faceapi.bufferToImage(f);
+  const d=await detectAll(img,true);
+  const cv=$('#photo');cv.style.display='block';const r=drawFaces(cv,d,img.width,img.height,img,m,false);$('#liveMsg').textContent=`${r.known}/${r.total}`;
+};
+$('#cls').oninput=progress;
+
+/* insights */
+function drawInsights(){
+  const keys=Object.keys(att),S=grp(),n=S.length,ids=new Set(S.map(s=>s.id));
+  const uniq=d=>{const s=new Set();keys.filter(k=>k.startsWith(d+'|')).forEach(k=>Object.keys(att[k]).forEach(i=>ids.has(i)&&s.add(i)));return s.size};
+  const sess=s=>keys.filter(k=>Object.keys(att[k]).some(i=>{const o=students.find(x=>x.id===i);return o&&gk(o)===gk(s)}));
+  const pcts=S.map(s=>{const r=sess(s);return{s,ns:r.length,p:r.length?Math.round(r.filter(k=>att[k][s.id]).length/r.length*100):0}}).sort((a,b)=>a.p-b.p),pt=uniq(today());
+  $('#stats').innerHTML=[['sky',n,'total'],['mint',pt,'today'],['lav',(n?Math.round(pt/n*100):0)+'%','rate'],['peach',pcts.filter(x=>x.ns&&x.p<75).length,'risk']].map(([c,v,l])=>`<div class="card ${c}"><b>${v}</b><span>${t(l)}</span></div>`).join('');
+  $('#bars').innerHTML=pcts.length?pcts.map(x=>`<div class="pb"><span style="width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.s.name)}</span><div class="t"><i class="${x.p<75?'r':''}" style="width:${x.p}%"></i></div><b>${x.p}%</b></div>`).join(''):`<div class="empty">${t('noStu')}</div>`;
+  let h='';for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*864e5).toLocaleDateString('en-CA'),r=n?uniq(d)/n:0;h+=`<i title="${d}: ${Math.round(r*100)}%" style="background:rgba(120,110,255,${.12+r*.75})"></i>`}
+  $('#heat').innerHTML=h;
+  const late=s=>keys.filter(k=>att[k][s.id]&&att[k][s.id].late).length,row=(s,v)=>`<div class="stu"><img src="${s.thumb}" alt=""><span style="flex:1">${esc(s.name)}</span><b>${v}</b></div>`,
+    top=pcts.filter(x=>x.ns).reverse().slice(0,3),lt=pcts.map(x=>({s:x.s,n:late(x.s)})).filter(x=>x.n).sort((a,b)=>b.n-a.n).slice(0,3);
+  $('#top').innerHTML=`<div class="g2"><div><h3>🏆 ${t('top')}</h3>${top.map(x=>row(x.s,x.p+'%')).join('')||'<div class="empty">–</div>'}</div><div><h3>⏰ ${t('mostLate')}</h3>${lt.map(x=>row(x.s,x.n+'×')).join('')||'<div class="empty">–</div>'}</div></div>`;
+}
+function drawGroups(){
+  const m={};students.forEach(s=>(m[gk(s)]=m[gk(s)]||[]).push(s));
+  const td=new Set();Object.keys(att).filter(k=>k.startsWith(today()+'|')).forEach(k=>Object.keys(att[k]).forEach(i=>td.add(i)));
+  $('#cg').innerHTML=Object.keys(m).sort().map(k=>{const [g,d]=k.split('|'),a=m[k],p=a.filter(s=>td.has(s.id)).length;
+    return `<div class="sc"><b>${g?gl(g,d):t('unassigned')}</b><div style="font-size:26px;font-weight:800">${a.length}</div><small>${p}/${a.length} ${t('today')}</small><div class="bar"><i style="width:${Math.round(p/a.length*100)}%"></i></div><button data-g="${g}" data-d="${d}">${t('open')}</button></div>`}).join('')||`<div class="empty">${t('noStu')}</div>`;
+  $$('#cg button').forEach(b=>b.onclick=()=>{FL.g=b.dataset.g;FL.d=b.dataset.d;fillSel();$('#cls').value=$('#rcls').value=gl(FL.g,FL.d);go('scan')});
+}
+/* records */
+function drawRecords(){
+  const d=$('#rdate').value||today(),c=$('#rcls').value||'General';$('#rdate').value=d;$('#rcls').value=c;
+  $('#cl').innerHTML=[...new Set(Object.keys(att).map(k=>k.split('|')[1]))].map(x=>`<option value="${esc(x)}">`).join('');
+  const rec=att[sk(d,c)]||{},q=($('#rq').value||'').toLowerCase(),f=$('#rst').value,all=grp(),S=x=>{const r=rec[x.id];return r?(r.late?'l':'p'):'a'},n={p:0,l:0,a:0};
+  all.forEach(x=>n[S(x)]++);$('#rsum').textContent=`${t('present')} ${n.p} · ${t('lateS')} ${n.l} · ${t('absent')} ${n.a}`;
+  const list=all.filter(x=>(x.name+x.roll).toLowerCase().includes(q)&&(!f||S(x)===f));
+  $('#table').innerHTML=list.length?`<table><tr><th>${t('roll')}</th><th>${t('name')}</th><th>${t('status')}</th><th>${t('time')}</th><th></th></tr>${list.map(s=>{const r=rec[s.id],k=S(s);return`<tr><td>${esc(s.roll)}</td><td>${esc(s.name)}</td><td><span class="st ${k}">${k==='a'?t('absent'):k==='l'?t('lateS'):t('present')}</span></td><td>${r?r.t:''}</td><td><input type="checkbox" data-id="${s.id}" ${r?'checked':''} aria-label="${esc(s.name)}"></td></tr>`}).join('')}</table>`:`<div class="empty">${t('noStu')}</div>`;
+  $$('#table input').forEach(cb=>cb.onchange=()=>{const k=sk(d,c);att[k]=att[k]||{};if(cb.checked)att[k][cb.dataset.id]={t:hm(),late:false,mood:''};else delete att[k][cb.dataset.id];persist();renderAll()});
+}
+$('#rq').oninput=$('#rst').onchange=drawRecords;
+const summary=()=>{const d=$('#rdate').value,c=$('#rcls').value||'General',rec=att[sk(d,c)]||{},a=grp().filter(s=>!rec[s.id]).map(s=>s.name);return `${c} · ${d}\n${t('present')}: ${grp().length-a.length}/${grp().length}\n${t('absent')}: ${a.join(', ')||'–'}`};
+$('#copyB').onclick=async()=>{try{await navigator.clipboard.writeText(summary());toast(t('copied'))}catch(e){prompt('',summary())}};
+$('#waB').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(summary()),'_blank','noopener');
+$('#csvAll').onclick=()=>{const keys=Object.keys(att);dl('attendance_report.csv',[['Roll','Name','Grade','Division','Sessions','Present','Late','Attendance %'],...grp().map(s=>{const r=keys.filter(k=>Object.keys(att[k]).some(i=>{const o=students.find(x=>x.id===i);return o&&gk(o)===gk(s)})),p=r.filter(k=>att[k][s.id]);return[s.roll,s.name,s.grade||'',s.div||'',r.length,p.length,p.filter(k=>att[k][s.id].late).length,r.length?Math.round(p.length/r.length*100):0]})])};
+$('#rdate').onchange=$('#rcls').onchange=drawRecords;
+$('#csv').onclick=()=>{
+  const d=$('#rdate').value,c=$('#rcls').value||'General',rec=att[sk(d,c)]||{},q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[['Roll','Name','Grade','Division','Date','Class','Status','Time'],...grp().map(s=>{const r=rec[s.id];return[s.roll,s.name,s.grade||'',s.div||'',d,c,r?(r.late?'Late':'Present'):'Absent',r?r.t:'']})];
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download=`attendance_${c}_${d}.csv`;a.click();
+};
+
+function drawHero(){
+  const n=students.length,td=new Map();
+  Object.keys(att).filter(k=>k.startsWith(today()+'|')).forEach(k=>Object.entries(att[k]).forEach(([i,r])=>{if(!td.has(i))td.set(i,r)}));
+  const st=students.filter(s=>td.has(s.id)),lt=st.filter(s=>td.get(s.id).late).length,pc=n?Math.round(st.length/n*100):0;
+  $('#rp').textContent=pc+'%';$('#rf').style.strokeDashoffset=314.16*(1-pc/100);
+  $('#mP').textContent=st.length-lt;$('#mL').textContent=lt;$('#mA').textContent=n-st.length;
+  let h='';for(let i=6;i>=0;i--){const dt=new Date(Date.now()-i*864e5),d=dt.toLocaleDateString('en-CA'),u=new Set();Object.keys(att).filter(k=>k.startsWith(d+'|')).forEach(k=>Object.keys(att[k]).forEach(x=>u.add(x)));const r=n?Math.min(1,u.size/n):0;h+=`<div title="${d}: ${Math.round(r*100)}%"><i style="height:${6+r*54}px"></i><small>${dt.toLocaleDateString(lang,{weekday:'narrow'})}</small></div>`}
+  $('#spark').innerHTML=h;
+  const rc=st.map(s=>({s,r:td.get(s.id)})).sort((a,b)=>b.r.t.localeCompare(a.r.t)).slice(0,3);
+  $('#tick').innerHTML=rc.length?rc.map(x=>`<div><img src="${x.s.thumb}" alt=""><span>${esc(x.s.name)}</span><small>${x.r.t}</small></div>`).join(''):`<div class="empty">${t('noFeed')}</div>`;
+}
+const clock=()=>$('#clk').textContent=new Date().toLocaleDateString(lang,{weekday:'short',day:'numeric',month:'short'})+' · '+hm();
+setInterval(clock,1000);clock();
+function renderAll(){
+  drawStudents();drawGroups();drawInsights();drawRecords();drawSettings();renderFeed();progress();
+  const k=Object.keys(att).filter(x=>x.startsWith(today()+'|')),s=new Set();k.forEach(x=>Object.keys(att[x]).forEach(i=>s.add(i)));
+  drawHero();
+}
+$('#markAll').onclick=()=>{const k=sk($('#rdate').value,$('#rcls').value);att[k]=att[k]||{};grp().forEach(s=>{if(!att[k][s.id])att[k][s.id]={t:hm(),late:false,mood:''}});persist();renderAll()};
+$('#prt').onclick=()=>window.print();
+function drawSettings(){$('#sDet').value=cfg.det*100;$('#sThr').value=cfg.thr*100;$('#dV').textContent=cfg.det;$('#tV').textContent=cfg.thr}
+$('#sDet').oninput=$('#sThr').oninput=()=>{cfg.det=$('#sDet').value/100;cfg.thr=$('#sThr').value/100;localStorage.setItem('fx_cfg',JSON.stringify(cfg));$('#dV').textContent=cfg.det;$('#tV').textContent=cfg.thr};
+$('#bk').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({students,att,cfg})],{type:'application/json'}));a.download='auralis-backup.json';a.click()};
+$('#rs').onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());students=d.students||[];att=d.att||{};persist();renderAll()}catch(x){alert('Invalid backup file')}e.target.value=''};
+$('#c1').onclick=()=>{if(confirm(t('confirm'))){Object.keys(att).filter(k=>k.startsWith(today()+'|')).forEach(k=>delete att[k]);persist();renderAll()}};
+$('#c2').onclick=()=>{if(confirm(t('confirm'))){students=[];att={};persist();renderAll()}};
+$('#theme').onclick=()=>setTheme(rt.dataset.theme==='dark'?'light':'dark');
+setTheme(rt.dataset.theme);
+applyLang();
+</script>
+</body>
+</html>
